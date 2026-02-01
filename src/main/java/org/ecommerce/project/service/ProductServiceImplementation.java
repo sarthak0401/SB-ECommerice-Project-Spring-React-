@@ -109,29 +109,36 @@ public class ProductServiceImplementation implements ProductService {
     }
 
     @Override
-    public ProductResponse getProductsByCategory(Long categoryId) {
-        List<Product> products = productRepository.findProductByCategory_CategoryIDOrderByPriceAsc(categoryId);
+    public ProductResponse getProductsByCategory(Long categoryId, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        // Implementing Pagination logic
+
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+        Page<Product> productPage = productRepository.findProductByCategory_CategoryIDOrderByPriceAsc(categoryId, pageDetails);
+
+        List<Product> products = productPage.getContent();
 
         // Checking if there exists any product with specified category
         if(!products.isEmpty()){
-            List<ProductDTO> productDTOS = products.stream().map(product -> modelMapper.map(product, ProductDTO.class)).toList();
-
-            ProductResponse productResponse = new ProductResponse();
-            productResponse.setContent(productDTOS);
-
-            return productResponse;
+            return fileService.settingPaginationResponse(products, productPage);
         }
         else throw new APIException("No products exits with the specified category");
 
     }
 
     @Override
-    public ProductResponse getAllProductsWrtKeywordSearch(String keyword) {
-        List<Product> products = productRepository.findProductByProductNameContainingIgnoreCase(keyword);
+    public ProductResponse getAllProductsWrtKeywordSearch(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        // Implementing pagination
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+
+        Page<Product> productPage = productRepository.findProductByProductNameContainingIgnoreCase(keyword, pageDetails);
+        List<Product> products = productPage.getContent();
 
         if(!products.isEmpty()){
-            List<ProductDTO> productDTOS = products.stream().map(product -> modelMapper.map(product, ProductDTO.class)).toList();
-            return new ProductResponse(productDTOS); // IMP : See here we are setting productDTOS in ProductResponse class using its lombok all args constructor
+            return fileService.settingPaginationResponse(products, productPage);
         }
         else throw new APIException("No product found with searched Keyword");
 
