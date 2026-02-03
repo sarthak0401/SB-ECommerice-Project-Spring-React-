@@ -14,7 +14,7 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "role_id")
-    private int roleId;
+    private Long roleId;
 
     // By default the enum type is stored in database as the integer, we need to convert that into String type for our roles using @Enumerated(EnumType.STRING)
     @ToString.Exclude
