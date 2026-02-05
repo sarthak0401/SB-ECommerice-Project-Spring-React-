@@ -74,4 +74,12 @@ public class User {
     joinColumns = @JoinColumn(name = "user_id"),
     inverseJoinColumns = @JoinColumn(name = "address_id"))
     private List<Address> addressList = new ArrayList<>();
+
+
+    // each user can have one cart associated with them, therefore OnetoOne
+    @ToString.Exclude
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    private Cart cart;
 }
+
+// In 1:m , m:1 owner is at the Many side, we specify it using JoinColumn annotation, And the non-owning side uses mapped-by attribute in mapping
