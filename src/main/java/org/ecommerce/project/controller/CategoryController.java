@@ -48,6 +48,7 @@ public class CategoryController {
     // Below is the implementation of @RequstMapping on method level, it takes two parameters, value and method
 
     //  @PostMapping("/public/categories")
+//    @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(value = "/public/categories", method = RequestMethod.POST)
     public ResponseEntity<CategoryDTO> insertCategory(@Valid @RequestBody CategoryDTO categoryDTO) {
 

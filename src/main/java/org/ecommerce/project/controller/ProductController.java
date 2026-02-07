@@ -8,6 +8,7 @@ import org.ecommerce.project.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,6 +16,8 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/api")
+//@EnableMethodSecurity
+//@EnableWebSecurity
 public class ProductController {
     @Autowired
     private ProductService productService;
@@ -60,6 +63,7 @@ public class ProductController {
 
 
     // Adding the product
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/admin/categories/{categoryId}/product")
     public ResponseEntity<ProductDTO> addProduct(@Valid @RequestBody ProductDTO productDTO, @PathVariable Long categoryId) {
         ProductDTO productDTO_response = productService.addProduct(categoryId, productDTO);

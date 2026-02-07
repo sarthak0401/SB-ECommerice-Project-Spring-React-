@@ -35,10 +35,8 @@ public class SecurityConfig  {
     @Autowired
     private AuthEntryPoint unauthorizedhandler;
 
-    @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter(){
-        return new AuthTokenFilter();
-    }
+    @Autowired
+    AuthTokenFilter authTokenFilter;
 
 
     @Bean
@@ -81,7 +79,7 @@ public class SecurityConfig  {
 
         http.authenticationProvider(authenticationProvider()); // This argument is coming from the authentication bean we created above
 
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         // For h2-console rendering
         http.headers(headers -> headers.frameOptions(
