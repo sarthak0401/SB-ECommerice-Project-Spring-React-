@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor // lombok
 public class Category {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     // THis will keep ID as unique -> primary key, but NOTE This strategy is NOT supported by all the databases
     private Long categoryID;
 

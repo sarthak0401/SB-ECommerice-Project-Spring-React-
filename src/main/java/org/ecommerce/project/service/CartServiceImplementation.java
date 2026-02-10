@@ -268,6 +268,8 @@ public class CartServiceImplementation implements CartService{
         return settingCartDTO(cart);
     }
 
+
+
     private CartDTO buildCartDTO(Cart cart) {
         CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
 
@@ -311,7 +313,15 @@ public class CartServiceImplementation implements CartService{
         if(cartItem==null) throw new APIException("Product "  + product.getProductName() + " Not available in the cart");
 
         // old price of the product is getting removed
-        
+        double cartPrice = cart.getTotalPrice() - (cartItem.getProductPrice() * cartItem.getQuantity());
+
+        // setting the new price of the product
+        cartItem.setProductPrice(product.getSpecialPrice());
+
+        // Setting the cart total price again with updated product price
+        cart.setTotalPrice(cartPrice + (cartItem.getProductPrice()* cartItem.getProductPrice()));
+
+        cartItem = cartItemRepository.save(cartItem);
     }
 
 

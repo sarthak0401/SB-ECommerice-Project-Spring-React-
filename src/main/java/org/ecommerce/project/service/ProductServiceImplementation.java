@@ -188,6 +188,12 @@ public class ProductServiceImplementation implements ProductService {
         Product productRetrieved = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product not found", "ID", productId));
         // With the above code, if the product is not found it'll throw ResourceNotFoundException
 
+        //List of carts containing the current product which is supposed to be deleted
+        List<Cart> carts = cartRepository.findCartByProductId(productId);
+
+        // From every cart we are deleting this product, and then removing it from the database
+        carts.forEach(cart -> cartService.deleteProductFromCart(cart.getCartId(), productId));
+
         productRepository.deleteById(productId);
         return "Product with id " + productId + " deleted successfully!";
     }
