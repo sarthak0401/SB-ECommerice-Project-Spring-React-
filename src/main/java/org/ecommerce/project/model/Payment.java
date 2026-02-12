@@ -36,8 +36,8 @@ public class Payment {
     private String pgName;
 
     // We will be creating the payment object without having the order information, therefore we created this custom constructor
-    public Payment(Long paymentId, String pgPaymentId, String pgStatus, String pgResponseMessage, String pgName){
-        this.paymentId = paymentId;
+    public Payment(String paymentMethod, String pgPaymentId, String pgStatus, String pgResponseMessage, String pgName){
+        this.paymentMethod = paymentMethod;
         this.pgPaymentId = pgPaymentId;
         this.pgStatus = pgStatus;
         this.pgResponseMessage = pgResponseMessage;

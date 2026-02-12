@@ -34,7 +34,7 @@ public class Order {
 
     private String orderStatus;
 
-    // One order will have one payment method
+    // One order will have one payment done for it, right
     @OneToOne
     @JoinColumn(name = "payment_id")
     private Payment payment;
