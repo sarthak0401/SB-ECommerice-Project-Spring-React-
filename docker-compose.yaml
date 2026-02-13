@@ -12,7 +12,7 @@ services:
       - pgdata:/var/lib/postgresql
 
   backend :
-    image: sarthakb413/sb-ecommerce-project-backend:1.0
+    image: sarthakb413/sb-ecommerce-project-backend:2.0
     container_name: sb-ecomm-backend
     depends_on:
       - db
