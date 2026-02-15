@@ -14,7 +14,6 @@ import org.ecommerce.project.repositories.CartItemRepository;
 import org.ecommerce.project.repositories.CartRepository;
 import org.ecommerce.project.repositories.ProductRepository;
 import org.ecommerce.project.util.AuthUtils;
-import org.jspecify.annotations.NonNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -149,7 +148,6 @@ public class CartServiceImplementation implements CartService{
         return settingCartDTO(cart);
     }
 
-    @NonNull
     private CartDTO settingCartDTO(Cart cart) {
         CartDTO cartDTO = new CartDTO();
         cartDTO.setCartId(cart.getCartId());

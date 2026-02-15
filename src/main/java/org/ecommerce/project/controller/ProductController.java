@@ -61,6 +61,12 @@ public class ProductController {
         return new ResponseEntity<>(productResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/public/product/{productId}")
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long productId){
+        ProductDTO respDTO = productService.getProductEntity(productId);
+        return new ResponseEntity<>(respDTO, HttpStatus.OK);
+    }
+
 
     // Adding the product
     @PreAuthorize("hasRole('ROLE_ADMIN')")

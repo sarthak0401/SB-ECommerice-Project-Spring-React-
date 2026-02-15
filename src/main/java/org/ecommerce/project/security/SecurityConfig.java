@@ -30,22 +30,25 @@ import java.util.Set;
 @EnableWebSecurity
 public class SecurityConfig  {
     @Autowired
-    UserDetailsServiceImplementation userDetailsServiceImplementation;
+    private UserDetailsServiceImplementation userDetailsServiceImplementation;
 
     @Autowired
     private AuthEntryPoint unauthorizedhandler;
 
     @Autowired
-    AuthTokenFilter authTokenFilter;
+    private AuthTokenFilter authTokenFilter;
 
+    @Autowired
+    private RateLimiterFilter rateLimiterFilter;
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider(){
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider(userDetailsServiceImplementation); // setting our custom userDetailsServiceImplementation into the authentication provider so that it can look into the database using the methods that we defined
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-
-        return daoAuthenticationProvider;
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsServiceImplementation);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception{
@@ -70,6 +73,7 @@ public class SecurityConfig  {
                 .requestMatchers("/api/admin/**").permitAll()   // Not good practice for production, we are doing it for development ease
                 .requestMatchers("/api/test/**").permitAll()
                 .requestMatchers("/images/**").permitAll()
+                .requestMatchers("/api/public/**").permitAll()
                 .anyRequest().authenticated());
 
 
@@ -78,6 +82,8 @@ public class SecurityConfig  {
         http.csrf(csrf -> csrf.disable());
 
         http.authenticationProvider(authenticationProvider()); // This argument is coming from the authentication bean we created above
+
+        http.addFilterBefore(rateLimiterFilter, UsernamePasswordAuthenticationFilter.class);
 
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 

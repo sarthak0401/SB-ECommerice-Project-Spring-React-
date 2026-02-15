@@ -15,6 +15,8 @@ import org.ecommerce.project.repositories.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -42,13 +44,16 @@ public class ProductServiceImplementation implements ProductService {
 
     @Value("${project.image_path}")
     private String path;
+
     @Autowired
     private CartRepository cartRepository;
     @Autowired
     private CartService cartService;
 
 
+    // This CacheEvict clears all the cache entry when the product is changed, allEntries = true, Because we don’t know which page/category/search contains that product → safest invalidation to delete cache for all the entries
     @Override
+    @CacheEvict(value = {"products", "productsByCategory", "productsWrtSearch", "product" }, allEntries = true)
     public ProductDTO addProduct(Long categoryId, ProductDTO productDTO) {
 
         //  Checking if product is already present or not
@@ -87,6 +92,7 @@ public class ProductServiceImplementation implements ProductService {
     }
 
     @Override
+    @Cacheable(value = "products")
     public ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
 
         Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
@@ -116,7 +122,11 @@ public class ProductServiceImplementation implements ProductService {
         }
     }
 
+
+    // We can keep any key in Cacheable, only we need to make it unique, so combining all the parameters we will get a unique combination of them
+
     @Override
+    @Cacheable(value = "productsByCategory", key = "#categoryId + '-' + #pageNumber + '-' + #pageSize + '-' + #sortBy + '-' + #sortOrder")
     public ProductResponse getProductsByCategory(Long categoryId, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         // Implementing Pagination logic
 
@@ -135,7 +145,9 @@ public class ProductServiceImplementation implements ProductService {
 
     }
 
+
     @Override
+    @Cacheable(value = "productsWrtSearch", key = "#keyword + '-' + #pageNumber + '-' + #pageSize + '-' + #sortBy + '-' + #sortOrder")
     public ProductResponse getAllProductsWrtKeywordSearch(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         // Implementing pagination
         Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
@@ -152,7 +164,19 @@ public class ProductServiceImplementation implements ProductService {
 
     }
 
+
+
+    // Searching the product by product id
+    @Cacheable(value = "product", key = "#productId")
+    public ProductDTO getProductEntity(Long productId){
+        Product product =  productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found", "ID", productId));
+        return modelMapper.map(product, ProductDTO.class);
+    }
+
+
     @Override
+    @CacheEvict(value = {"products", "productsByCategory", "productsWrtSearch", "product" }, allEntries = true)
     public ProductDTO updateProduct(ProductDTO productDTO, Long productId) {
 
         //Checking if the productRetrieved exists, i.e, the productId is valid or not. It will throw the exception if product is NOT found
@@ -184,6 +208,7 @@ public class ProductServiceImplementation implements ProductService {
     }
 
     @Override
+    @CacheEvict(value = {"products", "productsByCategory", "productsWrtSearch", "product" }, allEntries = true)
     public String deleteProduct(Long productId) {
         Product productRetrieved = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product not found", "ID", productId));
         // With the above code, if the product is not found it'll throw ResourceNotFoundException
@@ -199,6 +224,7 @@ public class ProductServiceImplementation implements ProductService {
     }
 
     @Override
+    @CacheEvict(value = {"products", "productsByCategory", "productsWrtSearch", "product" }, allEntries = true)
     public ProductDTO updateProductImage(Long productId, MultipartFile image) throws IOException {
         // Getting the product from the database
         Product productFromDatabase = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product Not found", "ID", productId));
