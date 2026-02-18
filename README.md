@@ -1,127 +1,165 @@
-# SB-ECommerce-Web-Application
+# SB-ECommerce Web Application (Backend)
 
-A backend for an e-commerce system built using **Spring Boot**.  
-The goal of this project was not just to create APIs, but to run the application in a real environment with database, caching and security — similar to how an actual backend service works.
+A production-style e-commerce backend built using Spring Boot.
+
+The goal of this project was not only to build APIs, but to run the backend in a realistic environment with authentication, caching, rate limiting and containerized deployment — similar to how real backend services operate.
 
 ---
 
 ## Tech Stack
 
-- **Backend:** Spring Boot (Java)
-- **Frontend:** React (separate project)
-- **Database:** PostgreSQL
-- **Cache:** Redis
-- **Authentication:** JWT stored in HTTP-only cookies
-- **Containerization:** Docker & Docker Compose
-- **Deployment:** AWS EC2
+**Backend:** Spring Boot (Java)  
+**Frontend:** React (separate project)  
+**Database:** PostgreSQL  
+**Cache & Rate Limiting:** Redis  
+**Authentication:** JWT (HTTP-only cookies)  
+**Containerization:** Docker & Docker Compose  
+**Orchestration:** Kubernetes  
+**Deployment:** AWS EC2
 
 ---
 
-## What the backend supports
+## Backend Capabilities
 
-The application handles typical e-commerce features:
+The backend supports common e-commerce workflows:
 
 - User authentication & authorization
-- Categories & products
+- Product categories & product listing
 - Cart management
 - Orders & order items
-- Address & payment flow
-- Pagination for large product lists
+- Address & checkout flow
+- Pagination for large datasets
 
 ---
 
-## Security
+## Authentication and Security
 
-Authentication is implemented using **JWT cookies**.
+Authentication is implemented using stateless JWT cookies.
 
-When a user logs in:
+### Flow
 
-- Server generates a token
-- Token stored in HTTP-only cookie
-- Every request is validated using a custom filter
+1. User logs in
+2. Server generates JWT
+3. Token stored in HTTP-only cookie
+4. Custom Spring Security filter validates every request
 
-This avoids storing passwords in sessions and keeps APIs stateless.
+This removes server sessions and keeps the system horizontally scalable.
 
 ---
 
-## Caching (Redis)
+## Redis Caching
 
-Product listing APIs are cached using Redis.
+Product listing endpoints are cached using Redis.
 
-**Why**
-- Product data is read very often
-- Database queries become expensive
+### Why caching
 
-**What happens**
-- First request → data comes from database
-- Next requests → served from cache
-- Product update/delete → cache cleared automatically
+Product data is read frequently but rarely updated.  
+Repeated database queries increase latency and load.
 
-This reduces repeated DB calls and improves response time.
+### Behaviour
+
+- First request → database hit → cached
+- Next requests → served from Redis
+- Product update/delete → cache invalidated automatically
+
+This significantly reduces database load and improves response time.
+
+See [demo.md](./demo.md) for cache hit vs miss behaviour.
 
 ---
 
 ## Rate Limiting
 
-To protect APIs from abuse (like too many login attempts), rate limiting is applied.
+Redis is also used for API rate limiting to prevent abuse.
 
-**Example**
+### Examples
+
 - Login endpoint → limited attempts per minute
-- Public product APIs → higher limit
+- Public product APIs → higher request limit
 
-If limit exceeds → server returns **429 Too Many Requests**
+If exceeded, server returns:
+
+HTTP 429 Too Many Requests
+
+Demonstration available in [demo.md](./demo.md).
 
 ---
 
-## Running the system (Docker Compose)
+## Running Locally (Docker Compose)
 
-The whole backend runs as multiple services:
+The backend runs as multiple coordinated services:
 
 - Spring Boot application
 - PostgreSQL database
 - Redis cache
 
-This allows the backend to behave like a real deployed system instead of a local-only project.
+This replicates a real deployed backend environment rather than a single local process.
 
-```bash
-docker compose up --build
-```
+```docker compose up --build ```
+Full walkthrough: [demo.md](./demo.md)
 
 ---
 
-## Deployment (AWS EC2)
+## Kubernetes Deployment
 
-The application is deployed on an EC2 instance using Docker Compose.
+The application can run with multiple replicas in Kubernetes.
 
-**Flow**
+This demonstrates a distributed systems concept:
+
+Local memory cache fails across pods, but Redis works as a shared distributed cache.
+
+### What is shown
+
+- Multiple pods serve requests
+- First request hits database
+- All other pods use shared Redis cache
+- Horizontal scaling without database overload
+
+Full distributed behaviour demo: [demo-k8s.md](./demo-k8s.md)
+
+---
+
+## AWS Deployment
+
+The system is deployed on an AWS EC2 instance using Docker Compose.
+
+### Deployment Flow
 
 1. Build backend image
-2. Pull on server
-3. Run containers together (app + db + redis)
+2. Pull image on server
+3. Run app + database + redis together
 
-The backend is accessible using the public IP of the instance.
+The backend becomes accessible via the instance public IP.
 
 ---
 
-## Why I built this
+## Why This Project
 
-Most tutorials stop after creating APIs.  
-In this project I focused on running the backend the way real services run:
+Most tutorials stop after building CRUD APIs.
 
-- Authentication without sessions
-- Caching frequently accessed data
-- Preventing abuse with rate limiting
-- Running multiple services together
-- Deploying to a cloud machine
+This project focuses on how backend services actually run in production:
+
+- Stateless authentication
+- Distributed caching
+- Rate limiting
+- Multi-service container setup
+- Horizontal scalability
+- Cloud deployment
+
+Every feature is demonstrated with observable behaviour rather than assumptions.
+
+See:
+
+- [Local behaviour demo](./demo.md) — local behaviour
+- [Distributed behaviour demo](./demo-k8s.md) — distributed behaviour
 
 ---
 
 ## Future Improvements
 
 - Async order processing using message queue
-- Monitoring with Prometheus & Grafana
+- Prometheus and Grafana monitoring
 - Payment gateway integration
+- Distributed tracing
 
-<h4>
-Thank you for checking out my project :)
-</h4>
+
