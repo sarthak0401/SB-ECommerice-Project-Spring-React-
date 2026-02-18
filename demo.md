@@ -142,14 +142,26 @@ Now Configuring AWS EC2 for deployment
 ## Redis Caching Behaviour
 
 1. First request → data fetched from DB
-   (screenshot: logs / response)
+
+<img width="1811" height="870" alt="image" src="https://github.com/user-attachments/assets/4ad12bb6-32a9-4377-8c6f-c0cdd1250a83" />
+
+- We can see the right hand side plane, which is actually the logs of the container on which backend service is running, in that we can see its creating the entry for cache. And in the left plane is actually the redis container through the redis-cli in MONITOR mode, so we can see it tries to do "GET" "products::0-5-productId-asc", coudnt find any matching, so it did SET the entry in redis
 
 2. Redis entry created
-   (redis-cli keys *)
 
-3. Update/Delete product → cache removed
-   (redis-cli keys * empty)
+<img width="686" height="236" alt="image" src="https://github.com/user-attachments/assets/5189b64a-9604-4b0a-a812-47b9d53eccf7" />
 
-4. Next request → DB hit again then cached
+3. Next request → DB hit again then cached
+
+<img width="1811" height="876" alt="image" src="https://github.com/user-attachments/assets/5cfd61a9-ea4b-4f82-b4f8-ccda26277d24" />
+
+- When we tried access the same getAllProducts API, this time it invoked the Cache, as we can see from the highlighted entry in the right plane. It says cache entry for the key is found. So it skips the database call and returns from cache itself. In the left side we can see the GET is called for the existing key
 
 
+ 4. Update/Delete product → cache removed
+
+<img width="1797" height="880" alt="image" src="https://github.com/user-attachments/assets/4ec33018-4ea4-4181-8465-07196faf5582" />
+
+- See the entries in the left hand side when the DELETE request is called, the previously existed cache key is deleted. Also in the backend logs as well (right side) we can see it says invalidating entire cache when the delete request is called
+
+- It shows caching working successfully
