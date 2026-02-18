@@ -8,6 +8,7 @@ git clone https://github.com/sarthak0401/SB-ECommerice-FullStack-WebApplication.
 
 Created ec2 instance to install k8s on it via k3s 
 <img width="1867" height="945" alt="image" src="https://github.com/user-attachments/assets/309b47b2-7a59-43b3-9612-6fa287806aca" />
+<img width="1579" height="374" alt="image" src="https://github.com/user-attachments/assets/7a6e457b-2b06-406d-9ad6-f3dd49763aa3" />
 
 
 
