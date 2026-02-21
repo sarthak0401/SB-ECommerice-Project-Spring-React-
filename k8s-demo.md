@@ -127,4 +127,4 @@ password = get it from kubectl get secret -n monitoring monitoring-grafana -o js
 <img width="1867" height="1008" alt="image" src="https://github.com/user-attachments/assets/740199f2-a6da-42d1-82d9-9f389fe09cf3" />
 
 
-
+- NOTE : In k8s directory i have added secret's file as well, I understand this is not a good practice in production. But since this project is made for learning purpose, so i added secret's file as well to the repository.
